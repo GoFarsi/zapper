@@ -32,21 +32,19 @@ type SentryConfig struct {
 
 // Core zapper base abstract
 type Core interface {
-	init(*Zapper) error
+	init(*Zap) error
 }
 
-type zapperCore struct {
-	do func(*Zapper) (zapcore.Core, error)
+type core struct {
+	do func(*Zap) (zapcore.Core, error)
 }
 
 // ConsoleWriterCore create console writer for zapper to show log in console
 func ConsoleWriterCore(colorable bool) Core {
-	return newCore(func(z *Zapper) (zapcore.Core, error) {
+	return newCore(func(z *Zap) (zapcore.Core, error) {
 		return zapcore.NewCore(encoder(z.development, colorable, z.timeFormat, func(cfg zapcore.EncoderConfig) zapcore.Encoder {
 			return zapcore.NewConsoleEncoder(cfg)
-		}), zapcore.AddSync(color.NewColorableStdout()), zap.LevelEnablerFunc(func(level zapcore.Level) bool {
-			return z.level.zapLevel() == level
-		})), nil
+		}), zapcore.AddSync(color.NewColorableStdout()), zap.LevelEnablerFunc(z.level)), nil
 	})
 }
 
@@ -56,7 +54,7 @@ func SentryCore(dsn string, serverName string, cfg *SentryConfig) Core {
 		cfg = _defaultSentryConfig()
 	}
 
-	return newCore(func(zapper *Zapper) (zapcore.Core, error) {
+	return newCore(func(zapper *Zap) (zapcore.Core, error) {
 		s, err := sentry.NewClient(sentry.ClientOptions{
 			Dsn:              dsn,
 			AttachStacktrace: cfg.AttachStacktrace,
@@ -87,7 +85,7 @@ func SentryCore(dsn string, serverName string, cfg *SentryConfig) Core {
 	})
 }
 
-func (z *zapperCore) init(zapper *Zapper) error {
+func (z *core) init(zapper *Zap) error {
 	core, err := z.do(zapper)
 	if err != nil {
 		return err
@@ -96,8 +94,8 @@ func (z *zapperCore) init(zapper *Zapper) error {
 	return nil
 }
 
-func newCore(f func(*Zapper) (zapcore.Core, error)) *zapperCore {
-	return &zapperCore{f}
+func newCore(f func(*Zap) (zapcore.Core, error)) *core {
+	return &core{f}
 }
 
 func _defaultRotation() *Rotation {
