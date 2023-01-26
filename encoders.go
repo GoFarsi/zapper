@@ -29,8 +29,6 @@ func encoder(development, colorable bool, timeFormat TimeFormat, encoderFunc enc
 		cfg.EncodeTime = zapcore.RFC3339TimeEncoder
 	case RFC3339NANO:
 		cfg.EncodeTime = zapcore.RFC3339NanoTimeEncoder
-	default:
-		cfg.EncodeTime = zapcore.ISO8601TimeEncoder
 	}
 
 	cfg.StacktraceKey = "stacktrace"
