@@ -11,14 +11,21 @@ type (
 	logKvFunc func(zap *zap.SugaredLogger, msg string, keyAndValues ...any)
 )
 
-type Zapper struct {
+type Zapper interface {
+	Caller
+
+	NewCore(...Core) error
+}
+
+type Zap struct {
 	zap   *zap.Logger
 	sugar *zap.SugaredLogger
 	cores []zapcore.Core
 
 	development bool
 	timeFormat  TimeFormat
-	level       Level
+	stackLevel  Level
+	level       func(lvl zapcore.Level) bool
 
 	debug  logFunc
 	debugF logfFunc
@@ -49,37 +56,44 @@ type Zapper struct {
 	fatalW logKvFunc
 }
 
-// New create new Zapper object
-func New(development bool, opts ...Option) *Zapper {
-	zapper := new(Zapper)
+// New create new Zap object
+func New(development bool, opts ...Option) Zapper {
+	zapper := new(Zap)
 
 	zapper.development = development
-	zapper.level = Info
+	zapper.stackLevel = Error
+	zapper.level = func(lvl zapcore.Level) bool {
+		return lvl >= Debug.zapLevel()
+	}
 
 	for _, opt := range opts {
 		opt(zapper)
 	}
 
-	zapper.funcLoader()
+	zapper.callersLoader()
 
 	return zapper
 }
 
 // NewCore create cores for zapper
-func (z *Zapper) NewCore(cores ...Core) error {
+func (z *Zap) NewCore(cores ...Core) error {
+	if len(cores) == 0 {
+		cores = append(cores, _defaultCore())
+	}
+
 	for _, core := range cores {
 		if err := core.init(z); err != nil {
 			return err
 		}
 	}
 
-	z.zap = zap.New(zapcore.NewTee(z.cores...), zap.AddCaller(), zap.AddStacktrace(Error.zapLevel()))
+	z.zap = zap.New(zapcore.NewTee(z.cores...), zap.AddCaller(), zap.AddCallerSkip(1), zap.AddStacktrace(z.stackLevel.zapLevel()))
 	z.sugar = z.zap.Sugar()
 
 	return nil
 }
 
-func (z *Zapper) funcLoader() {
+func (z *Zap) callersLoader() {
 	z.debug = (*zap.SugaredLogger).Debug
 	z.debugF = (*zap.SugaredLogger).Debugf
 	z.debugW = (*zap.SugaredLogger).Debugw
@@ -101,4 +115,8 @@ func (z *Zapper) funcLoader() {
 	z.fatal = (*zap.SugaredLogger).Fatal
 	z.fatalF = (*zap.SugaredLogger).Fatalf
 	z.fatalW = (*zap.SugaredLogger).Fatalw
+}
+
+func _defaultCore() Core {
+	return ConsoleWriterCore(true)
 }
