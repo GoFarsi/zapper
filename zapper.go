@@ -1,6 +1,7 @@
 package zapper
 
 import (
+	"github.com/TheZeroSlave/zapsentry"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -18,9 +19,10 @@ type Zapper interface {
 }
 
 type Zap struct {
-	zap   *zap.Logger
-	sugar *zap.SugaredLogger
-	cores []zapcore.Core
+	zap        *zap.Logger
+	sugar      *zap.SugaredLogger
+	cores      []zapcore.Core
+	sentryCore zapcore.Core
 
 	development bool
 	timeFormat  TimeFormat
@@ -81,13 +83,25 @@ func (z *Zap) NewCore(cores ...Core) error {
 		cores = append(cores, _defaultCore())
 	}
 
-	for _, core := range cores {
-		if err := core.init(z); err != nil {
+	useSentry := false
+
+	for _, c := range cores {
+		s, ok := c.(*core)
+		if ok && s.coreType == SENTRY {
+			useSentry = true
+		}
+		if err := c.init(z); err != nil {
 			return err
 		}
 	}
 
 	z.zap = zap.New(zapcore.NewTee(z.cores...), zap.AddCaller(), zap.AddCallerSkip(1), zap.AddStacktrace(z.stackLevel.zapLevel()))
+
+	if useSentry {
+		z.zap = zapsentry.AttachCoreToLogger(z.sentryCore, z.zap)
+		z.zap = z.zap.With(zapsentry.NewScope())
+	}
+
 	z.sugar = z.zap.Sugar()
 
 	return nil

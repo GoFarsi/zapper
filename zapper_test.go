@@ -73,3 +73,12 @@ func Test_ConsoleWriterCore(t *testing.T) {
 		})
 	}
 }
+
+func Test_SentryCore(t *testing.T) {
+	zapper := New(false, WithCustomStackTraceLevel(Warn))
+	if err := zapper.NewCore(SentryCore("https://43bc037c7b504219ac3f3cca1f113ea4@o334462.ingest.sentry.io/4504569607159808", "test", nil)); err != nil {
+		t.Fatal(err)
+	}
+
+	zapper.Error("sentry error 2")
+}

@@ -6,6 +6,18 @@ import (
 	color "github.com/mattn/go-colorable"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"time"
+)
+
+//go:generate stringer -type=coreType
+
+type coreType int
+
+const (
+	CONSOLE coreType = iota
+	SENTRY
+	FILE
+	JSON
 )
 
 // Rotation config log file rotation in log path
@@ -28,6 +40,7 @@ type SentryConfig struct {
 	MaxSpans          int
 	Tags              map[string]string
 	MinLevel          Level
+	FlushTimeout      time.Duration
 }
 
 // Core zapper base abstract
@@ -36,12 +49,13 @@ type Core interface {
 }
 
 type core struct {
-	do func(*Zap) (zapcore.Core, error)
+	coreType coreType
+	do       func(*Zap) (zapcore.Core, error)
 }
 
 // ConsoleWriterCore create console writer for zapper to show log in console
 func ConsoleWriterCore(colorable bool) Core {
-	return newCore(func(z *Zap) (zapcore.Core, error) {
+	return newCore(CONSOLE, func(z *Zap) (zapcore.Core, error) {
 		return zapcore.NewCore(encoder(z.development, colorable, z.timeFormat, func(cfg zapcore.EncoderConfig) zapcore.Encoder {
 			return zapcore.NewConsoleEncoder(cfg)
 		}), zapcore.AddSync(color.NewColorableStdout()), zap.LevelEnablerFunc(z.level)), nil
@@ -54,7 +68,7 @@ func SentryCore(dsn string, serverName string, cfg *SentryConfig) Core {
 		cfg = _defaultSentryConfig()
 	}
 
-	return newCore(func(zapper *Zap) (zapcore.Core, error) {
+	return newCore(SENTRY, func(zapper *Zap) (zapcore.Core, error) {
 		s, err := sentry.NewClient(sentry.ClientOptions{
 			Dsn:              dsn,
 			AttachStacktrace: cfg.AttachStacktrace,
@@ -71,31 +85,42 @@ func SentryCore(dsn string, serverName string, cfg *SentryConfig) Core {
 			return nil, NewError("failed to create sentry client: %s", err.Error())
 		}
 
-		core, err := zapsentry.NewCore(zapsentry.Configuration{
+		c, err := zapsentry.NewCore(zapsentry.Configuration{
 			Tags:              cfg.Tags,
 			Level:             cfg.MinLevel.zapLevel(),
 			EnableBreadcrumbs: cfg.EnableBreadcrumbs,
 			BreadcrumbLevel:   cfg.BreadcrumbLevel.zapLevel(),
+			DisableStacktrace: false,
+			FlushTimeout:      cfg.FlushTimeout,
 		}, zapsentry.NewSentryClientFromClient(s))
 		if err != nil {
 			return nil, NewError("failed to create core sentry: %s", err.Error())
 		}
 
-		return core, nil
+		return c, nil
 	})
 }
 
 func (z *core) init(zapper *Zap) error {
-	core, err := z.do(zapper)
+	c, err := z.do(zapper)
 	if err != nil {
 		return err
 	}
-	zapper.cores = append(zapper.cores, core)
+
+	if z.coreType == SENTRY {
+		zapper.sentryCore = c
+		return nil
+	}
+
+	zapper.cores = append(zapper.cores, c)
 	return nil
 }
 
-func newCore(f func(*Zap) (zapcore.Core, error)) *core {
-	return &core{f}
+func newCore(coreType coreType, f func(*Zap) (zapcore.Core, error)) *core {
+	return &core{
+		coreType: coreType,
+		do:       f,
+	}
 }
 
 func _defaultRotation() *Rotation {
@@ -108,14 +133,13 @@ func _defaultRotation() *Rotation {
 
 func _defaultSentryConfig() *SentryConfig {
 	return &SentryConfig{
-		AttachStacktrace:  true,
-		EnableTracing:     false,
-		Debug:             false,
-		Environment:       "",
-		Dist:              "",
-		Tags:              make(map[string]string),
+		AttachStacktrace: true,
+		Tags: map[string]string{
+			"component": "system",
+		},
 		MinLevel:          Error,
 		EnableBreadcrumbs: true,
 		BreadcrumbLevel:   Info,
+		FlushTimeout:      2 * time.Second,
 	}
 }
