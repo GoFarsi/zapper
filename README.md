@@ -4,7 +4,7 @@ zapper is zap but customized with multi core and sentry support, zapper make eas
 ### Cores
 - [x] Console Writer
 - [x] Sentry Core
-- [ ] File Writer
+- [x] File Writer
 - [ ] Json Core
 
 ## Install
@@ -58,6 +58,29 @@ func main() {
 
 func err(z zapper.Zapper) {
 	z.Error("test error new")
+}
+```
+
+- File Writer Core
+
+```go
+package main
+
+import (
+	"github.com/GoFarsi/zapper"
+	"log"
+)
+
+func main() {
+	z := zapper.New(true, zapper.WithDebugLevel())
+	if err := z.NewCore(zapper.FileWriterCore("./test_data", nil)); err != nil {
+		log.Fatal(err)
+	}
+
+	z.Debug("debug log")
+	z.Info("info log")
+	z.Warn("warn log")
+	z.Error("error log")
 }
 ```
 

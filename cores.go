@@ -1,11 +1,14 @@
 package zapper
 
 import (
+	"fmt"
 	"github.com/TheZeroSlave/zapsentry"
 	"github.com/getsentry/sentry-go"
 	color "github.com/mattn/go-colorable"
+	"github.com/natefinch/lumberjack"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"path/filepath"
 	"time"
 )
 
@@ -22,15 +25,15 @@ const (
 
 // Rotation config log file rotation in log path
 type Rotation struct {
-	MaxAge   int
-	FileSize int
-	Compress bool
+	MaxAge   int  // MaxAge is the maximum number of days to retain old log files based on the timestamp encoded in their filename. Note that a day is defined as 24 hours and may not exactly correspond to calendar days due to daylight savings, leap seconds, etc. The default is not to remove old log files based on age.
+	FileSize int  // FileSize is the maximum size in megabytes of the log file before it gets rotated. It defaults to 100 megabytes
+	Compress bool // Compress determines if the rotated log files should be compressed using gzip. The default is not to perform compression
 }
 
 // SentryConfig for sentry core set custom configs
 type SentryConfig struct {
-	AttachStacktrace  bool
-	Debug             bool
+	AttachStacktrace  bool // AttachStacktrace attach stacktrace to event
+	Debug             bool // Debug add debug data to event
 	EnableTracing     bool
 	Environment       string
 	Dist              string
@@ -101,6 +104,28 @@ func SentryCore(dsn string, serverName string, cfg *SentryConfig) Core {
 	})
 }
 
+// FileWriterCore write logs into file
+func FileWriterCore(logPath string, rotation *Rotation) Core {
+	return newCore(FILE, func(z *Zap) (zapcore.Core, error) {
+		if _, err := filepath.Abs(logPath); err != nil {
+			return nil, NewError("logPath is invalid absolute path: %s", err.Error())
+		}
+
+		if rotation == nil {
+			rotation = _defaultRotation()
+		}
+
+		syncer, err := fileWriteSyncer(logPath, rotation)
+		if err != nil {
+			return nil, NewError("failed to create log path: %s", err.Error())
+		}
+
+		return zapcore.NewCore(encoder(z.development, false, z.timeFormat, func(cfg zapcore.EncoderConfig) zapcore.Encoder {
+			return zapcore.NewConsoleEncoder(cfg)
+		}), zapcore.Lock(syncer), zap.LevelEnablerFunc(z.level)), nil
+	})
+}
+
 func (z *core) init(zapper *Zap) error {
 	c, err := z.do(zapper)
 	if err != nil {
@@ -121,6 +146,17 @@ func newCore(coreType coreType, f func(*Zap) (zapcore.Core, error)) *core {
 		coreType: coreType,
 		do:       f,
 	}
+}
+
+func fileWriteSyncer(logPath string, rotation *Rotation) (zapcore.WriteSyncer, error) {
+	path := filepath.Join(logPath, fmt.Sprintf("%s.log", time.Now().Format("2006-01-02_15-04-05")))
+
+	r := new(lumberjack.Logger)
+	r.Filename = path
+	r.MaxAge = rotation.MaxAge
+	r.MaxSize = rotation.FileSize
+	r.Compress = rotation.Compress
+	return zapcore.AddSync(r), nil
 }
 
 func _defaultRotation() *Rotation {

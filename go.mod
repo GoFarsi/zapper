@@ -11,6 +11,7 @@ require (
 
 require (
 	github.com/mattn/go-isatty v0.0.17 // indirect
+	github.com/natefinch/lumberjack v0.0.0-20230119042236-215739b3bcdc // indirect
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
 	golang.org/x/sys v0.4.0 // indirect
