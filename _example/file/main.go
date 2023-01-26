@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	z := zapper.New(true, zapper.WithDebugLevel())
+	z := zapper.New(true, zapper.WithDebugLevel(), zapper.WithServiceDetails(23, "zapper"))
 	if err := z.NewCore(zapper.FileWriterCore("./test_data", nil)); err != nil {
 		log.Fatal(err)
 	}

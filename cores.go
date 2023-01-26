@@ -115,7 +115,7 @@ func FileWriterCore(logPath string, rotation *Rotation) Core {
 			rotation = _defaultRotation()
 		}
 
-		syncer, err := fileWriteSyncer(logPath, rotation)
+		syncer, err := fileWriteSyncer(logPath, z.service.Name, rotation)
 		if err != nil {
 			return nil, NewError("failed to create log path: %s", err.Error())
 		}
@@ -148,8 +148,12 @@ func newCore(coreType coreType, f func(*Zap) (zapcore.Core, error)) *core {
 	}
 }
 
-func fileWriteSyncer(logPath string, rotation *Rotation) (zapcore.WriteSyncer, error) {
-	path := filepath.Join(logPath, fmt.Sprintf("%s.log", time.Now().Format("2006-01-02_15-04-05")))
+func fileWriteSyncer(logPath, serviceName string, rotation *Rotation) (zapcore.WriteSyncer, error) {
+	if len(serviceName) != 0 {
+		serviceName = fmt.Sprintf("%s_", serviceName)
+	}
+
+	path := filepath.Join(logPath, fmt.Sprintf("%s%s.log", serviceName, time.Now().Format("2006-01-02_15-04-05")))
 
 	r := new(lumberjack.Logger)
 	r.Filename = path

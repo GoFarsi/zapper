@@ -6,6 +6,13 @@ import (
 
 type Option func(*Zap)
 
+// WithServiceDetails set service name for zapper and show service name for log files
+func WithServiceDetails(serviceCode uint, serviceName string) Option {
+	return func(z *Zap) {
+		z.service = &service{serviceCode, serviceName}
+	}
+}
+
 // WithDebugLevel enable debug level for logging
 func WithDebugLevel() Option {
 	return func(z *Zap) {
@@ -28,7 +35,6 @@ func WithCustomStackTraceLevel(level Level) Option {
 		if level < Warn {
 			level = Error
 		}
-
 		z.stackLevel = level
 	}
 }

@@ -16,6 +16,8 @@ type Zapper interface {
 	Caller
 
 	NewCore(...Core) error
+	GetServiceCode() uint
+	GetServiceName() string
 }
 
 type Zap struct {
@@ -28,6 +30,7 @@ type Zap struct {
 	timeFormat  TimeFormat
 	stackLevel  Level
 	level       func(lvl zapcore.Level) bool
+	service     *service
 
 	debug  logFunc
 	debugF logfFunc
@@ -58,11 +61,17 @@ type Zap struct {
 	fatalW logKvFunc
 }
 
+type service struct {
+	Code uint
+	Name string
+}
+
 // New create new Zap object
 func New(development bool, opts ...Option) Zapper {
 	zapper := new(Zap)
 
 	zapper.development = development
+	zapper.service = new(service)
 	zapper.stackLevel = Error
 	zapper.level = func(lvl zapcore.Level) bool {
 		return lvl >= Debug.zapLevel()
@@ -105,6 +114,14 @@ func (z *Zap) NewCore(cores ...Core) error {
 	z.sugar = z.zap.Sugar()
 
 	return nil
+}
+
+func (z *Zap) GetServiceCode() uint {
+	return z.service.Code
+}
+
+func (z *Zap) GetServiceName() string {
+	return z.service.Name
 }
 
 func (z *Zap) callersLoader() {
