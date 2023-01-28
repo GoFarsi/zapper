@@ -115,13 +115,35 @@ func FileWriterCore(logPath string, rotation *Rotation) Core {
 			rotation = _defaultRotation()
 		}
 
-		syncer, err := fileWriteSyncer(logPath, z.service.Name, rotation)
+		syncer, err := fileWriteSyncer(logPath, ".log", z.service.Name, rotation)
 		if err != nil {
 			return nil, NewError("failed to create log path: %s", err.Error())
 		}
 
 		return zapcore.NewCore(encoder(z.development, false, z.timeFormat, func(cfg zapcore.EncoderConfig) zapcore.Encoder {
 			return zapcore.NewConsoleEncoder(cfg)
+		}), zapcore.Lock(syncer), zap.LevelEnablerFunc(z.level)), nil
+	})
+}
+
+// JsonWriterCore write logs with json format, fileExtension is for set output file extension json,log and etc
+func JsonWriterCore(logPath, fileExtension string, rotation *Rotation) Core {
+	return newCore(JSON, func(z *Zap) (zapcore.Core, error) {
+		if _, err := filepath.Abs(logPath); err != nil {
+			return nil, NewError("logPath is invalid absolute path: %s", err.Error())
+		}
+
+		if rotation == nil {
+			rotation = _defaultRotation()
+		}
+
+		syncer, err := fileWriteSyncer(logPath, fileExtension, z.service.Name, rotation)
+		if err != nil {
+			return nil, NewError("failed to create log path: %s", err.Error())
+		}
+
+		return zapcore.NewCore(encoder(z.development, false, z.timeFormat, func(cfg zapcore.EncoderConfig) zapcore.Encoder {
+			return zapcore.NewJSONEncoder(cfg)
 		}), zapcore.Lock(syncer), zap.LevelEnablerFunc(z.level)), nil
 	})
 }
@@ -148,12 +170,16 @@ func newCore(coreType coreType, f func(*Zap) (zapcore.Core, error)) *core {
 	}
 }
 
-func fileWriteSyncer(logPath, serviceName string, rotation *Rotation) (zapcore.WriteSyncer, error) {
+func fileWriteSyncer(logPath, extFile, serviceName string, rotation *Rotation) (zapcore.WriteSyncer, error) {
 	if len(serviceName) != 0 {
 		serviceName = fmt.Sprintf("%s_", serviceName)
 	}
 
-	path := filepath.Join(logPath, fmt.Sprintf("%s%s.log", serviceName, time.Now().Format("2006-01-02_15-04-05")))
+	path := filepath.Join(logPath, fmt.Sprintf("%s%s%s", serviceName, time.Now().Format("2006-01-02_15-04-05"), extFile))
+
+	if len(filepath.Ext(path)) == 0 {
+		return nil, NewError("file extension is invalid")
+	}
 
 	r := new(lumberjack.Logger)
 	r.Filename = path
