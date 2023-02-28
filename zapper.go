@@ -18,6 +18,7 @@ type Zapper interface {
 	NewCore(...Core) error
 	GetServiceCode() uint
 	GetServiceName() string
+	GetZap() *zap.Logger
 }
 
 type Zap struct {
