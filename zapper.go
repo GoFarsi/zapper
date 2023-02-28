@@ -124,6 +124,10 @@ func (z *Zap) GetServiceName() string {
 	return z.service.Name
 }
 
+func (z *Zap) GetZap() *zap.Logger {
+	return z.zap
+}
+
 func (z *Zap) callersLoader() {
 	z.debug = (*zap.SugaredLogger).Debug
 	z.debugF = (*zap.SugaredLogger).Debugf
