@@ -1,10 +1,9 @@
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
-github.com/TheZeroSlave/zapsentry v1.12.0 h1:hhfwvD7pQbnCIOvAEGM4NXLiaX4b6W6ZWNtL6awSBGc=
-github.com/TheZeroSlave/zapsentry v1.12.0/go.mod h1:00uO/VpPrSJG/XigAfTi0F4WMFIw2DmP/IDVUhPBvNw=
+github.com/BurntSushi/toml v1.2.0 h1:Rt8g24XnyGTyglgET/PRUNlrUeu9F5L+7FilkXfZgs0=
+github.com/TheZeroSlave/zapsentry v1.14.0 h1:z6H0lIyKVpdXsP5K8J11b4/+V+QCDLDslZmtXsnduMk=
+github.com/TheZeroSlave/zapsentry v1.14.0/go.mod h1:0hUR1Et5tSroEYhWOZcxE2iBqcFkuG7jGGlUmOA7XAs=
 github.com/benbjohnson/clock v1.1.0 h1:Q92kusRqC1XV2MjkWETPvjJVqKetz1OzxZB7mHJLju8=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
-github.com/getsentry/sentry-go v0.17.0 h1:UustVWnOoDFHBS7IJUB2QK/nB5pap748ZEp0swnQJak=
-github.com/getsentry/sentry-go v0.17.0/go.mod h1:B82dxtBvxG0KaPD8/hfSV+VcHD+Lg/xUS4JuQn1P4cM=
 github.com/getsentry/sentry-go v0.19.0 h1:BcCH3CN5tXt5aML+gwmbFwVptLLQA+eT866fCO9wVOM=
 github.com/getsentry/sentry-go v0.19.0/go.mod h1:y3+lGEFEFexZtpbG1GUE2WD/f9zGyKYwpEqryTOC/nE=
 github.com/go-errors/errors v1.4.2 h1:J6MZopCL4uSllY1OfXM374weqZFFItUbrImctkmUxIA=
