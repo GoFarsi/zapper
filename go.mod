@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/TheZeroSlave/zapsentry v1.12.0
-	github.com/getsentry/sentry-go v0.17.0
+	github.com/getsentry/sentry-go v0.19.0
 	github.com/mattn/go-colorable v0.1.13
 	go.uber.org/zap v1.24.0
 )
