@@ -6,7 +6,7 @@ require (
 	github.com/TheZeroSlave/zapsentry v1.14.0
 	github.com/getsentry/sentry-go v0.19.0
 	github.com/mattn/go-colorable v0.1.13
-	github.com/natefinch/lumberjack v0.0.0-20230119042236-215739b3bcdc
+	github.com/natefinch/lumberjack v2.0.0+incompatible
 	go.uber.org/zap v1.24.0
 )
 
@@ -16,4 +16,5 @@ require (
 	go.uber.org/multierr v1.9.0 // indirect
 	golang.org/x/sys v0.4.0 // indirect
 	golang.org/x/text v0.6.0 // indirect
+	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 )
