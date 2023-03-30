@@ -17,13 +17,21 @@ import (
 
 //go:generate stringer -type=coreType
 
-type coreType int
+type (
+	coreType          int
+	SentryEnvironment int
+)
 
 const (
 	CONSOLE coreType = iota
 	SENTRY
 	FILE
 	JSON
+)
+
+const (
+	DEVELOPMENT SentryEnvironment = iota // DEVELOPMENT application environment
+	PRODUCTION                           // PRODUCTION application environment
 )
 
 // Rotation config log file rotation in log path
@@ -69,7 +77,7 @@ func ConsoleWriterCore(colorable bool) Core {
 }
 
 // SentryCore send log into sentry service
-func SentryCore(dsn string, serverName string, cfg *SentryConfig) Core {
+func SentryCore(dsn string, serverName string, environment SentryEnvironment, cfg *SentryConfig) Core {
 	if cfg == nil {
 		cfg = _defaultSentryConfig()
 	}
@@ -82,7 +90,7 @@ func SentryCore(dsn string, serverName string, cfg *SentryConfig) Core {
 			Debug:            cfg.Debug,
 			EnableTracing:    cfg.EnableTracing,
 			TracesSampleRate: 1.0,
-			Environment:      cfg.Environment,
+			Environment:      environment.String(),
 			Dist:             cfg.Dist,
 			MaxBreadcrumbs:   cfg.MaxBreadcrumbs,
 			MaxSpans:         cfg.MaxSpans,
@@ -160,6 +168,17 @@ func JsonWriterCore(logPath, fileExtension string, rotation *Rotation) Core {
 			return zapcore.NewJSONEncoder(cfg)
 		}), zapcore.Lock(syncer), zap.LevelEnablerFunc(z.level)), nil
 	})
+}
+
+func (e SentryEnvironment) String() string {
+	switch e {
+	case DEVELOPMENT:
+		return "Development"
+	case PRODUCTION:
+		return "Production"
+	default:
+		return "Development"
+	}
 }
 
 func (z *core) init(zapper *Zap) error {

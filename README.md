@@ -49,7 +49,7 @@ import (
 
 func main() {
 	z := zapper.New(false)
-	if err := z.NewCore(zapper.SentryCore(os.Getenv("DSN"), "test", nil)); err != nil {
+	if err := z.NewCore(zapper.SentryCore(os.Getenv("DSN"), "test", zapper.DEVELOPMENT, nil)); err != nil {
 		log.Fatal(err)
 	}
 
