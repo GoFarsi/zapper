@@ -2,6 +2,7 @@ package zapper
 
 import (
 	"github.com/TheZeroSlave/zapsentry"
+	"github.com/getsentry/sentry-go"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -19,13 +20,15 @@ type Zapper interface {
 	GetServiceCode() uint
 	GetServiceName() string
 	GetZap() *zap.Logger
+	GetSentryClient() *sentry.Client
 }
 
 type Zap struct {
-	zap        *zap.Logger
-	sugar      *zap.SugaredLogger
-	cores      []zapcore.Core
-	sentryCore zapcore.Core
+	zap          *zap.Logger
+	sugar        *zap.SugaredLogger
+	cores        []zapcore.Core
+	sentryCore   zapcore.Core
+	sentryClient *sentry.Client
 
 	development bool
 	timeFormat  TimeFormat
@@ -127,6 +130,10 @@ func (z *Zap) GetServiceName() string {
 
 func (z *Zap) GetZap() *zap.Logger {
 	return z.zap
+}
+
+func (z *Zap) GetSentryClient() *sentry.Client {
+	return z.sentryClient
 }
 
 func (z *Zap) callersLoader() {

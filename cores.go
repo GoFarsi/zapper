@@ -88,6 +88,8 @@ func SentryCore(dsn string, serverName string, cfg *SentryConfig) Core {
 			MaxSpans:         cfg.MaxSpans,
 		})
 
+		zapper.sentryClient = s
+
 		if cfg.EnableTracing {
 			tp := sdktrace.NewTracerProvider(
 				sdktrace.WithSpanProcessor(sentryotel.NewSentrySpanProcessor()),
