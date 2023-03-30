@@ -4,8 +4,11 @@ import (
 	"fmt"
 	"github.com/TheZeroSlave/zapsentry"
 	"github.com/getsentry/sentry-go"
+	sentryotel "github.com/getsentry/sentry-go/otel"
 	color "github.com/mattn/go-colorable"
 	"github.com/natefinch/lumberjack"
+	"go.opentelemetry.io/otel"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"path/filepath"
@@ -78,11 +81,20 @@ func SentryCore(dsn string, serverName string, cfg *SentryConfig) Core {
 			ServerName:       serverName,
 			Debug:            cfg.Debug,
 			EnableTracing:    cfg.EnableTracing,
+			TracesSampleRate: 1.0,
 			Environment:      cfg.Environment,
 			Dist:             cfg.Dist,
 			MaxBreadcrumbs:   cfg.MaxBreadcrumbs,
 			MaxSpans:         cfg.MaxSpans,
 		})
+
+		if cfg.EnableTracing {
+			tp := sdktrace.NewTracerProvider(
+				sdktrace.WithSpanProcessor(sentryotel.NewSentrySpanProcessor()),
+			)
+			otel.SetTracerProvider(tp)
+			otel.SetTextMapPropagator(sentryotel.NewSentryPropagator())
+		}
 
 		if err != nil {
 			return nil, NewError("failed to create sentry client: %s", err.Error())
