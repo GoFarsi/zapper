@@ -1,6 +1,6 @@
 github.com/BurntSushi/toml v1.2.1 h1:9F2/+DoOYIOksmaJFPw1tGFy1eDnIJXg+UHjuD8lTak=
-github.com/TheZeroSlave/zapsentry v1.14.0 h1:z6H0lIyKVpdXsP5K8J11b4/+V+QCDLDslZmtXsnduMk=
-github.com/TheZeroSlave/zapsentry v1.14.0/go.mod h1:0hUR1Et5tSroEYhWOZcxE2iBqcFkuG7jGGlUmOA7XAs=
+github.com/TheZeroSlave/zapsentry v1.15.0 h1:w/YglG4Hc2L2VoEH6JKC+3YzhUL18/OZRjJRSvyXZp4=
+github.com/TheZeroSlave/zapsentry v1.15.0/go.mod h1:D1YMfSuu6xnkhwFXxrronesmsiyDhIqo+86I3Ok+r64=
 github.com/benbjohnson/clock v1.1.0 h1:Q92kusRqC1XV2MjkWETPvjJVqKetz1OzxZB7mHJLju8=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/getsentry/sentry-go v0.20.0 h1:bwXW98iMRIWxn+4FgPW7vMrjmbym6HblXALmhjHmQaQ=

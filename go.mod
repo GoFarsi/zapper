@@ -3,7 +3,7 @@ module github.com/GoFarsi/zapper
 go 1.19
 
 require (
-	github.com/TheZeroSlave/zapsentry v1.14.0
+	github.com/TheZeroSlave/zapsentry v1.15.0
 	github.com/getsentry/sentry-go v0.20.0
 	github.com/getsentry/sentry-go/otel v0.19.0
 	github.com/mattn/go-colorable v0.1.13
