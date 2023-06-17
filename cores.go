@@ -83,7 +83,7 @@ func SentryCore(dsn string, serverName string, environment SentryEnvironment, cf
 	}
 
 	return newCore(SENTRY, func(zapper *Zap) (zapcore.Core, error) {
-		s, err := sentry.NewClient(sentry.ClientOptions{
+		sentryCfg := sentry.ClientOptions{
 			Dsn:              dsn,
 			AttachStacktrace: cfg.AttachStacktrace,
 			ServerName:       serverName,
@@ -94,7 +94,21 @@ func SentryCore(dsn string, serverName string, environment SentryEnvironment, cf
 			Dist:             cfg.Dist,
 			MaxBreadcrumbs:   cfg.MaxBreadcrumbs,
 			MaxSpans:         cfg.MaxSpans,
-		})
+		}
+
+		ignoredErr := make([]string, 0)
+		switch cfg.MinLevel {
+		case Fatal, Panic, DPanic:
+			ignoredErr = append(ignoredErr, "error", "warning", "info", "debug")
+		case Error:
+			ignoredErr = append(ignoredErr, "warning", "info", "debug")
+		case Warn:
+			ignoredErr = append(ignoredErr, "info", "debug")
+		}
+
+		sentryCfg.IgnoreErrors = ignoredErr
+
+		s, err := sentry.NewClient(sentryCfg)
 
 		zapper.sentryClient = s
 
