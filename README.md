@@ -1,4 +1,4 @@
-# zapper [![Go Reference](https://pkg.go.dev/badge/github.com/GoFarsi/zapper.svg)](https://pkg.go.dev/github.com/GoFarsi/zapper)
+# zapper [![Go Reference](https://pkg.go.dev/badge/github.com/GoFarsi/zapper.svg)](https://pkg.go.dev/github.com/GoFarsi/zapper) [![Go Report Card](https://goreportcard.com/badge/github.com/GoFarsi/zapper)](https://goreportcard.com/report/github.com/GoFarsi/zapper)
 zapper is zap but customized with multi core and sentry support, zapper make easiest usage with zap logger.
 
 ### Cores
