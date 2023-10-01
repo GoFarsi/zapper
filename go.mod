@@ -8,7 +8,7 @@ require (
 	github.com/getsentry/sentry-go/otel v0.21.0
 	github.com/mattn/go-colorable v0.1.13
 	github.com/natefinch/lumberjack v2.0.0+incompatible
-	github.com/stretchr/testify v1.8.3
+	github.com/stretchr/testify v1.8.4
 	go.opentelemetry.io/otel v1.16.0
 	go.opentelemetry.io/otel/sdk v1.16.0
 	go.uber.org/zap v1.24.0
