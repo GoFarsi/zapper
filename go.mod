@@ -4,8 +4,8 @@ go 1.19
 
 require (
 	github.com/TheZeroSlave/zapsentry v1.15.0
-	github.com/getsentry/sentry-go v0.21.0
-	github.com/getsentry/sentry-go/otel v0.21.0
+	github.com/getsentry/sentry-go v0.24.1
+	github.com/getsentry/sentry-go/otel v0.24.1
 	github.com/mattn/go-colorable v0.1.13
 	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/stretchr/testify v1.8.3
